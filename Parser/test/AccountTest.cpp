@@ -71,7 +71,8 @@ TEST_F(AccountTest, AccountNumberBaseCaseInvalid) {
 	// Tests that the base case returns something invalid for an invalid digit text
 	assertAccountNumberSizeIsNine();
 	ASSERT_TRUE(a0.assignAccountNumberDigit(0, " _  _  _ "));
-	EXPECT_EQ(Digits::ACCOUNT_DIGIT_INVALID, a0.getAccountNumberDigitValue(0, 0));
+	EXPECT_EQ(Digits::ACCOUNT_DIGIT_INVALID,
+			a0.getAccountNumberDigitValue(0, 0));
 }
 
 // Test that a zero string is decoded digits 0 through 9
@@ -97,9 +98,9 @@ TEST_F(AccountTest, PrintAccount) {
 	assertAllZeroIsValidAccountNumber();
 	ASSERT_STREQ("000000000", a0.printAccountNumber().c_str());
 	std::string accountNumberString =
-					std::string  ("    _  _     _  _  _  _  _ ")
-					+ std::string("  | _| _||_||_ |_   ||_||_|")
-					+ std::string("  ||_  _|  | _||_|  ||_| _|");
+			std::string  ("    _  _     _  _  _  _  _ ")
+			+ std::string("  | _| _||_||_ |_   ||_||_|")
+			+ std::string("  ||_  _|  | _||_|  ||_| _|");
 	a0.assignAccountNumber(accountNumberString);
 	assertAccountNumberSizeIsNine();
 	ASSERT_STREQ("123456789", a0.printAccountNumber().c_str());
@@ -108,13 +109,34 @@ TEST_F(AccountTest, PrintAccount) {
 // Test that a check sum is calculated correctly
 TEST_F(AccountTest, ChecksumTest) {
 	std::string accountNumberString =
-						std::string  ("    _  _     _  _  _  _  _ ")
-						+ std::string("  | _| _||_||_ |_   ||_||_|")
-						+ std::string("  ||_  _|  | _||_|  ||_| _|");
+			std::string  ("    _  _     _  _  _  _  _ ")
+			+ std::string("  | _| _||_||_ |_   ||_||_|")
+			+ std::string("  ||_  _|  | _||_|  ||_| _|");
 	a0.assignAccountNumber(accountNumberString);
 	assertAccountNumberSizeIsNine();
-//	ASSERT_EQ(, a0.calcChecksum());
+	ASSERT_EQ(0, a0.calcAccountNumberChecksum());
 }
 
+// Test an Illegible number
+TEST_F(AccountTest, IllegibleNumberTest) {
+	std::string accountNumberString =
+			std::string  ("    _  _  _  _  _  _     _ ")
+			+ std::string("|_||_|| || ||_   |  |  | _ ")
+			+ std::string("  | _||_||_||_|  |  |  | _|");
+	a0.assignAccountNumber(accountNumberString);
+	assertAccountNumberSizeIsNine();
+	ASSERT_STREQ("49006771? ILL", a0.appendAccountNumberStatus(a0.printAccountNumber()).c_str());
+}
+
+// Test an checksum error when printing number
+TEST_F(AccountTest, ChecksumErrorNumberTest) {
+	std::string accountNumberString =
+			std::string  (" _  _     _  _        _  _ ")
+			+ std::string("|_ |_ |_| _|  |  ||_||_||_ ")
+			+ std::string("|_||_|  | _|  |  |  | _| _|");
+	a0.assignAccountNumber(accountNumberString);
+	assertAccountNumberSizeIsNine();
+	ASSERT_STREQ("664371495 ERR", a0.appendAccountNumberStatus(a0.printAccountNumber()).c_str());
+}
 } /* namespace accounts */
 

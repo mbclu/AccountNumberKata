@@ -17,8 +17,8 @@ namespace accounts {
 // Enumeration for the different ways a file read can complete
 enum FileReadReturnCode {
 	FILE_READ_RETURN_SUCCESS = 0,
-	FILE_READ_RETURN_LINE_EMPTY,
 	FILE_READ_RETURN_FILE_DOES_NOT_EXIST,
+	FILE_READ_RETURN_LINE_EMPTY,
 	FILE_READ_RETURN_INVALID_LINE_LENGTH,
 	FILE_READ_RETURN_INVALID_LINE_CHARS,
 	FILE_READ_RETURN_INVALID_END_OF_ACCOUNT_CHARS
@@ -57,6 +57,7 @@ public:
 	std::string getCurrentAccountNumberString();
 	std::string printAccount(const unsigned int index);
 	std::string printAccounts();
+	std::string printAccountsWithStatus();
 
 private:
 	FileReadReturnCode openFile(const char * fileName,

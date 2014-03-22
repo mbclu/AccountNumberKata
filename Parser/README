@@ -1,0 +1,31 @@
+This program takes a file of account numbers represented as ' ', '_' and '|' characters
+and prints them out as account numbers.
+
+There is a some basic error checking including whether or not the files exists
+and if the account numbers are formatted correctly. Additionally, the account numbers
+will be reported as "ERR" if they do not have a valid checksum and "ILL" if 1 or more
+of the account numbers is illegible.
+
+	Progam Exit codes:
+		1	FILE_READ_RETURN_FILE_DOES_NOT_EXIST
+				The input file did not exist or could not be opened.
+		2	FILE_READ_RETURN_LINE_EMPTY
+				The file was read and an empty line was encountered 
+				with more accounts after it.
+		3	FILE_READ_RETURN_INVALID_LINE_LENGTH
+				The file was read and a line was encountered that had 
+				an invalid length.
+		4	FILE_READ_RETURN_INVALID_LINE_CHARS
+				The file was read and a line was encountered that had a 
+				character other than ' ', '_', or '|'.
+		5	FILE_READ_RETURN_INVALID_END_OF_ACCOUNT_CHARS
+				The file was read and the fourth line of the account 
+				was something other than a line of all spaces.
+	
+To run the program, open a command shell in and call the program from the command line.
+Command line usage is as follows:
+Valid arguments are a single input file name OR
+an input file name accompanied by an output file name.
+
+If only the input file name is given, the output will be written to the standard output.
+If an output file is also specified, the account numbers will be written to the file.

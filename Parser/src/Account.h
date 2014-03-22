@@ -64,6 +64,7 @@ public:
 	int getAccountNumberDigitValue(unsigned int digitIndex, unsigned int charIndex);
 	bool assignAccountNumberDigit(unsigned int index, std::string digitString);
 	std::string printAccountNumber();
+	std::string appendAccountNumberStatus(std::string);
 	int calcAccountNumberChecksum();
 };
 

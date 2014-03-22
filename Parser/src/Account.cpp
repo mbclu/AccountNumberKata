@@ -141,7 +141,22 @@ std::string Account::printAccountNumber() {
 }
 
 int Account::calcAccountNumberChecksum() {
+	int checksum = -1;
+	checksum = getAccountNumberDigitValue(Account::ACCOUNT_LENGTH-1, 0);
+	for (int i = Account::ACCOUNT_LENGTH - 1; i >= 0; --i) {
+		checksum += (getAccountNumberDigitValue(i, 0) * 2);
+	}
+	return checksum % 11;
+}
 
+std::string Account::appendAccountNumberStatus(std::string str) {
+	if (str.find_first_of('?') != std::string::npos) {
+		str += " ILL";
+	}
+	else if (calcAccountNumberChecksum() != 0) {
+		str += " ERR";
+	}
+	return str;
 }
 
 } /* namespace accounts */

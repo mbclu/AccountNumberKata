@@ -130,4 +130,12 @@ std::string AccountFileReader::printAccounts() {
 	return retString;
 }
 
+std::string AccountFileReader::printAccountsWithStatus() {
+	std::string retString = "";
+	for (unsigned int i = 0; i < accounts.size(); ++i) {
+		retString += accounts[i].appendAccountNumberStatus(printAccount(i)) + "\r\n";
+	}
+	return retString;
+}
+
 } /* namespace accounts */
