@@ -28,7 +28,8 @@ TEST_F(AccountFileReaderTest, LineIsEmptyIntially) {
 
 // Test that the line count starts at zero
 TEST_F(AccountFileReaderTest, LineCountIsZeroInitially) {
-	ASSERT_EQ(0, fr0.getCurrentLineCount());
+	ASSERT_EQ(0, fr0.currentLineCount);
+	ASSERT_EQ(0, fr0.totalLineCountRead);
 }
 
 // Test that account strings are initialized to an empty string
@@ -37,6 +38,7 @@ TEST_F(AccountFileReaderTest, AccountStringIsEmptyIntially) {
 }
 
 // Test that we have not reached the end of the file
+// Also Test that the overall line count is recorded at the first error
 TEST_F(AccountFileReaderTest, FileNotAtEOF) {
 	// Test an existing file that does not have any content
 	assertAccountFileExists("EmptyFile.txt");
@@ -59,6 +61,7 @@ TEST_F(AccountFileReaderTest, FileNotAtEOF) {
 	ASSERT_EQ(FILE_READ_RETURN_SUCCESS, fr0.checkLineGood(line));
 	line = "";
 	ASSERT_EQ(FILE_READ_RETURN_LINE_EMPTY, fr0.checkLineGood(line));
+	ASSERT_EQ(FILE_READ_RETURN_LINE_EMPTY, fr0.checkLineGood(line));
 }
 
 // Test that the line of the file is the correct length (27)
@@ -74,14 +77,15 @@ TEST_F(AccountFileReaderTest, LineLengthIsValid) {
 TEST_F(AccountFileReaderTest, LineCountResets) {
 	// Test with an empty file because even if it is not opened it should be reset
 	ASSERT_EQ(FILE_READ_RETURN_FILE_DOES_NOT_EXIST, fr0.readFile(""));
-	ASSERT_EQ(0, fr0.getCurrentLineCount());
+	ASSERT_EQ(0, fr0.currentLineCount);
+	ASSERT_EQ(0, fr0.totalLineCountRead);
 }
 
 // Test that the line count increments after good read
 TEST_F(AccountFileReaderTest, LineCountIncrements) {
 	// Test that we increment the count if a line of good length was read in
 	assertLineLengthValid("SingleGoodLine.txt");
-	ASSERT_EQ(1, fr0.getCurrentLineCount());
+	ASSERT_EQ(1, fr0.currentLineCount);
 }
 
 // Test that all the characters in a line are correct, (' ', '_', '|')
@@ -128,40 +132,40 @@ TEST_F(AccountFileReaderTest, AccountsCanBeAdded) {
 // Test that the printer will fail gracefully
 TEST_F(AccountFileReaderTest, PrintAccountNumberCanFail) {
 	assertValidSingleAccountFileRead("000000000.txt");
-	ASSERT_STREQ("", fr0.printAccount(fr0.getAccounts().size() +1).c_str());
+	ASSERT_STREQ("", fr0.printAccount(fr0.getAccounts().size() +1, false).c_str());
 }
 
 // Test that we can print
 TEST_F(AccountFileReaderTest, PrintAccountNumber) {
 	assertValidSingleAccountFileRead("000000000.txt");
 	ASSERT_EQ(1, fr0.getAccounts().size());
-	ASSERT_STREQ("000000000", fr0.printAccount(0).c_str());
+	ASSERT_STREQ("000000000", fr0.printAccount(0, false).c_str());
 }
 
 // Test that we can print a bunch of account numbers
 TEST_F(AccountFileReaderTest, PrintAccountNumbers) {
 	assertValidSingleAccountFileRead("000000000.txt");
-	EXPECT_STREQ("000000000\r\n", fr0.printAccounts().c_str());
+	EXPECT_STREQ("000000000\r\n", fr0.printAccounts(false).c_str());
 	assertValidSingleAccountFileRead("111111111.txt");
-	EXPECT_STREQ("111111111\r\n", fr0.printAccounts().c_str());
+	EXPECT_STREQ("111111111\r\n", fr0.printAccounts(false).c_str());
 	assertValidSingleAccountFileRead("222222222.txt");
-	EXPECT_STREQ("222222222\r\n", fr0.printAccounts().c_str());
+	EXPECT_STREQ("222222222\r\n", fr0.printAccounts(false).c_str());
 	assertValidSingleAccountFileRead("333333333.txt");
-	EXPECT_STREQ("333333333\r\n", fr0.printAccounts().c_str());
+	EXPECT_STREQ("333333333\r\n", fr0.printAccounts(false).c_str());
 	assertValidSingleAccountFileRead("444444444.txt");
-	EXPECT_STREQ("444444444\r\n", fr0.printAccounts().c_str());
+	EXPECT_STREQ("444444444\r\n", fr0.printAccounts(false).c_str());
 	assertValidSingleAccountFileRead("555555555.txt");
-	EXPECT_STREQ("555555555\r\n", fr0.printAccounts().c_str());
+	EXPECT_STREQ("555555555\r\n", fr0.printAccounts(false).c_str());
 	assertValidSingleAccountFileRead("666666666.txt");
-	EXPECT_STREQ("666666666\r\n", fr0.printAccounts().c_str());
+	EXPECT_STREQ("666666666\r\n", fr0.printAccounts(false).c_str());
 	assertValidSingleAccountFileRead("777777777.txt");
-	EXPECT_STREQ("777777777\r\n", fr0.printAccounts().c_str());
+	EXPECT_STREQ("777777777\r\n", fr0.printAccounts(false).c_str());
 	assertValidSingleAccountFileRead("888888888.txt");
-	EXPECT_STREQ("888888888\r\n", fr0.printAccounts().c_str());
+	EXPECT_STREQ("888888888\r\n", fr0.printAccounts(false).c_str());
 	assertValidSingleAccountFileRead("999999999.txt");
-	EXPECT_STREQ("999999999\r\n", fr0.printAccounts().c_str());
+	EXPECT_STREQ("999999999\r\n", fr0.printAccounts(false).c_str());
 	assertValidSingleAccountFileRead("123456789.txt");
-	EXPECT_STREQ("123456789\r\n", fr0.printAccounts().c_str());
+	EXPECT_STREQ("123456789\r\n", fr0.printAccounts(false).c_str());
 }
 
 // Test that we can read and print in a larger file with multiple account numbers
@@ -184,7 +188,7 @@ TEST_F(AccountFileReaderTest, PrintAccountNumbersFromSingleFile) {
 	expected += "777777777\r\n";
 	expected += "888888888\r\n";
 	expected += "999999999\r\n";
-	EXPECT_STREQ(expected.c_str(), fr0.printAccounts().c_str());
+	EXPECT_STREQ(expected.c_str(), fr0.printAccounts(false).c_str());
 }
 
 } /* namespace accounts */

@@ -14,6 +14,7 @@ namespace accounts {
 AccountFileReader::AccountFileReader() {
 	currentAccountLine = "";
 	currentLineCount = 0;
+	totalLineCountRead = 0;
 	currentAccountNumberString = "";
 }
 
@@ -24,16 +25,8 @@ Accounts AccountFileReader::getAccounts() {
 	return accounts;
 }
 
-std::string AccountFileReader::getCurrentAccountLine() {
-	return currentAccountLine;
-}
-
-unsigned int AccountFileReader::getCurrentLineCount() {
-	return currentLineCount;
-}
-
-std::string AccountFileReader::getCurrentAccountNumberString() {
-	return currentAccountNumberString;
+unsigned int AccountFileReader::getTotalLineCountRead() {
+	return totalLineCountRead;
 }
 
 // Read in an account file given the name and a file stream to read from
@@ -44,6 +37,7 @@ FileReadReturnCode AccountFileReader::readFile(const char * inputFileName) {
 
 	// Reset the line count and make sure the accounts are all emptied
 	currentLineCount = 0;
+	totalLineCountRead = 0;
 	while (accounts.size() > 0) {
 		accounts.pop_back();
 	}
@@ -52,19 +46,26 @@ FileReadReturnCode AccountFileReader::readFile(const char * inputFileName) {
 	retValue = openFile(inputFileName, inFileStream);
 	while (getline(inFileStream, currentAccountLine)
 			&& FILE_READ_RETURN_SUCCESS == retValue) {
-		retValue = checkLineGood(currentAccountLine);
-		if (FILE_READ_RETURN_SUCCESS == retValue) {
+		// Increment the total number of lines read in
+		totalLineCountRead++;
 
+		// Check if the line was something valid
+		retValue = checkLineGood(currentAccountLine);
+
+		// Keep adding lines to the account string until we get to the 4th
+		// line at which case we push the account string into the vector of accounts
+		if (FILE_READ_RETURN_SUCCESS == retValue) {
 			if (currentLineCount > 0) {
 				currentAccountNumberString += currentAccountLine;
 			} else {
-				account.assignAccountNumber(currentAccountNumberString);
+				account.assignRawAccountNumber(currentAccountNumberString);
 				accounts.push_back(account);
 				currentAccountLine = "";
 				currentAccountNumberString = "";
 			}
 		}
 	}
+
 	inFileStream.close();
 	return retValue;
 }
@@ -114,26 +115,22 @@ FileReadReturnCode AccountFileReader::checkLineGood(std::string & line) {
 	return lineReadStatus;
 }
 
-std::string AccountFileReader::printAccount(const unsigned int index) {
+std::string AccountFileReader::printAccount(const unsigned int index, bool showStatus) {
 	std::string retString = "";
 	if (index < accounts.size()) {
-		retString = accounts[index].printAccountNumber();
+		retString = accounts[index].printAccountNumber(showStatus);
 	}
 	return retString;
 }
 
-std::string AccountFileReader::printAccounts() {
+std::string AccountFileReader::printAccounts(bool showStatus) {
 	std::string retString = "";
-	for (unsigned int i = 0; i < accounts.size(); ++i) {
-		retString += printAccount(i) + "\r\n";
-	}
-	return retString;
-}
-
-std::string AccountFileReader::printAccountsWithStatus() {
-	std::string retString = "";
-	for (unsigned int i = 0; i < accounts.size(); ++i) {
-		retString += accounts[i].appendAccountNumberStatus(printAccount(i)) + "\r\n";
+	if (accounts.size() == 0) {
+		retString = "No valid accounts.\r\n";
+	} else {
+		for (unsigned int i = 0; i < accounts.size(); ++i) {
+			retString += printAccount(i, showStatus) + "\r\n";
+		}
 	}
 	return retString;
 }

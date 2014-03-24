@@ -37,6 +37,10 @@ class AccountFileReader {
 	FRIEND_TEST(AccountFileReaderTest, ReadValidEndOfAccountLine);
 	FRIEND_TEST(AccountFileReaderTest, FourByTwentySevenAccountNumberIsValid);
 	FRIEND_TEST(AccountFileReaderTest, PrintAccountNumberCanFail);
+	FRIEND_TEST(AccountFileReaderTest, PrintAccountNumber);
+	FRIEND_TEST(AccountFileReaderTest, LineCountIsZeroInitially);
+	FRIEND_TEST(AccountFileReaderTest, LineCountIncrements);
+	FRIEND_TEST(AccountFileReaderTest, LineCountResets);
 
 protected:
 	static const size_t validLineLength = 27;
@@ -44,6 +48,7 @@ protected:
 	Accounts accounts;
 	std::string currentAccountLine;
 	unsigned int currentLineCount;
+	unsigned int totalLineCountRead;
 	std::string currentAccountNumberString;
 
 public:
@@ -52,17 +57,14 @@ public:
 
 	FileReadReturnCode readFile(const char * inputFileName);
 	Accounts getAccounts();
-	std::string getCurrentAccountLine();
-	unsigned int getCurrentLineCount();
-	std::string getCurrentAccountNumberString();
-	std::string printAccount(const unsigned int index);
-	std::string printAccounts();
-	std::string printAccountsWithStatus();
+	std::string printAccounts(bool showStatus);
+	unsigned int getTotalLineCountRead();
 
 private:
-	FileReadReturnCode openFile(const char * fileName,
-			std::ifstream& fileStream);
+	FileReadReturnCode openFile(const char * fileName, std::ifstream& fileStream);
 	FileReadReturnCode checkLineGood(std::string& line);
+
+	std::string printAccount(const unsigned int index, bool showStatus);
 };
 
 } /* namespace accounts */

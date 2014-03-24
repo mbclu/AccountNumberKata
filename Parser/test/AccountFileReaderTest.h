@@ -44,13 +44,13 @@ protected:
 	}
 
 	void assertLineIsEmpty() {
-		ASSERT_TRUE(fr0.getCurrentAccountLine().empty());
-		ASSERT_STREQ(fr0.getCurrentAccountLine().c_str(), "");
+		ASSERT_TRUE(fr0.currentAccountLine.empty());
+		ASSERT_STREQ(fr0.currentAccountLine.c_str(), "");
 	}
 
 	void assertAccountStringEmpty() {
-		ASSERT_TRUE(fr0.getCurrentAccountNumberString().empty());
-		ASSERT_STREQ(fr0.getCurrentAccountNumberString().c_str(), "");
+		ASSERT_TRUE(fr0.currentAccountLine.empty());
+		ASSERT_STREQ(fr0.currentAccountLine.c_str(), "");
 	}
 
 	void assertFileReadCompletesSuccessfully(const char * fileName) {

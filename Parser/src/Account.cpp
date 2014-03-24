@@ -10,57 +10,17 @@
 
 namespace accounts {
 
-// Constant member for account digit value length
-const unsigned int AccountDigit::ACCOUNT_DIGIT_STRING_LENGTH = 9;
-const int Digits::ACCOUNT_DIGIT_INVALID = -1;
-const char * Digits::DIGIT_STRINGS[] = {
-		" _ "
-		"| |"
-		"|_|",
-		"   "
-		"  |"
-		"  |",
-		" _ "
-		" _|"
-		"|_ ",
-		" _ "
-		" _|"
-		" _|",
-		"   "
-		"|_|"
-		"  |",
-		" _ "
-		"|_ "
-		" _|",
-		" _ "
-		"|_ "
-		"|_|",
-		" _ "
-		"  |"
-		"  |",
-		" _ "
-		"|_|"
-		"|_|",
-		" _ "
-		"|_|"
-		" _|" };
-
 // Constant member for account length
 const unsigned int Account::ACCOUNT_LENGTH = 9;
 
+/* ACCOUNT SECTION */
 // Account Constructor
 Account::Account() {
-	accountNumber.reserve(Account::ACCOUNT_LENGTH);
+	accountNumberDigits.reserve(Account::ACCOUNT_LENGTH);
 	for (unsigned int i = 0; i < Account::ACCOUNT_LENGTH; ++i) {
-		accountNumber.push_back(AccountDigit());
+		accountNumberDigits.push_back(AccountDigit());
 	}
-	resetPossibleDigits();
-}
-
-void Account::resetPossibleDigits() {
-	for (unsigned int i = 0; i < Digits::TOTAL_DIGITS; ++i) {
-		possibleDigits[i] = true;
-	}
+	checksum = -1;
 }
 
 // Account Destructor
@@ -69,94 +29,50 @@ Account::~Account() {
 
 // Account class method to get the entire account number
 AccountNumber Account::getAccountNumber() {
-	return accountNumber;
+	return accountNumberDigits;
 }
 
 // Take the account number as it is expected from the file and create an account number
-void Account::assignAccountNumber(std::string accountString) {
+void Account::assignRawAccountNumber(std::string accountString) {
 	for (unsigned int i = 0; i < Account::ACCOUNT_LENGTH; ++i) {
-		accountNumber[i].setStringValue(
+		accountNumberDigits[i].setRawStringValue (
 				accountString.substr(i * 3, 3) +
 				accountString.substr((i * 3) + (Account::ACCOUNT_LENGTH * 3), 3) +
 				accountString.substr((i * 3) + (Account::ACCOUNT_LENGTH * 6), 3));
 	}
+	// Make sure to set the checksum value as well
+	calcAccountNumberChecksum();
 }
 
-// Account class method to interpret the value of a number in the account
-int Account::getAccountNumberDigitValue(unsigned int digitIndex, unsigned int charIndex) {
-	int retValue = Digits::ACCOUNT_DIGIT_INVALID;	// Chose an invalid number to start
-
-	if (digitIndex < ACCOUNT_LENGTH && charIndex < AccountDigit::ACCOUNT_DIGIT_STRING_LENGTH) {
-		// Pre-Recursion
-		// Check if the number is still a possibility and then validate this character
-		for (unsigned int i = 0; i < Digits::TOTAL_DIGITS; ++i) {
-			if (possibleDigits[i] != false) {
-				if (accountNumber[digitIndex].getStringValue().c_str()[charIndex] != Digits::DIGIT_STRINGS[i][charIndex]) {
-					possibleDigits[i] = false;
-				}
-			}
-		}
-
-		// Call this function recursively until we reach the end of the string
-		while (getAccountNumberDigitValue(digitIndex, ++charIndex) > 0) {
-		}
-
-		// Post-Recursion
-		// Change the return value to the true one
-		for (unsigned int i = 0; i < Digits::TOTAL_DIGITS; ++i) {
-			if (possibleDigits[i] == true) {
-				retValue = i;
-				break;
-			}
-		}
-	}
-
-	return retValue;
-}
-
-// Account class method to add a string value to the account digit at a given index
-bool Account::assignAccountNumberDigit(unsigned int index,
-		std::string digitString) {
-	bool retValue = false;
-	if (index < ACCOUNT_LENGTH) {
-		accountNumber[index].setStringValue(digitString);
-		retValue = accountNumber[index].isValid();
-	}
-	return retValue;
-}
-
-std::string Account::printAccountNumber() {
+std::string Account::printAccountNumber(bool showStatus) {
 	int digit = -1;
 	std::string retString = "";
 	for (unsigned int i = 0; i < Account::ACCOUNT_LENGTH; ++i) {
-		digit = getAccountNumberDigitValue(i, 0);
-		resetPossibleDigits();
+		digit = accountNumberDigits[i].getNumericValue();
 		if (-1 == digit) {
 			retString += '?';
 		} else {
 			retString += ('0' + digit);
 		}
 	}
+	if (true == showStatus) {
+		if (retString.find_first_of('?') != std::string::npos) {
+			retString += " ILL";
+		} else if (checksum != 0) {
+			retString += " ERR";
+		}
+	}
 	return retString;
 }
 
-int Account::calcAccountNumberChecksum() {
-	int checksum = -1;
-	checksum = getAccountNumberDigitValue(Account::ACCOUNT_LENGTH-1, 0);
-	for (int i = Account::ACCOUNT_LENGTH - 1; i >= 0; --i) {
-		checksum += (getAccountNumberDigitValue(i, 0) * 2);
+// Calculates the account number checksum according to the formula
+// (d1 + d2 * 2 + d3 * 3 + d4 * 4 + d5 * 5 + d6 *6 + d7 * 7 +d8 * 8 + d9 * 9) % 11 == 0
+void Account::calcAccountNumberChecksum() {
+	checksum = accountNumberDigits[Account::ACCOUNT_LENGTH - 1].getNumericValue();
+	for (int i = Account::ACCOUNT_LENGTH - 2; i >= 0; --i) {
+		checksum += (accountNumberDigits[i].getNumericValue() * 2);
 	}
-	return checksum % 11;
-}
-
-std::string Account::appendAccountNumberStatus(std::string str) {
-	if (str.find_first_of('?') != std::string::npos) {
-		str += " ILL";
-	}
-	else if (calcAccountNumberChecksum() != 0) {
-		str += " ERR";
-	}
-	return str;
+	checksum %= 11;
 }
 
 } /* namespace accounts */

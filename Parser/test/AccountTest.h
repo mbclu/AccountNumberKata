@@ -28,8 +28,8 @@ protected:
 	Account a0;
 
 	void assertAccountDigitStringNotEmptyWhenSet(std::string value) {
-		ad.setStringValue(value);
-		ASSERT_FALSE(ad.getStringValue().empty());
+		ad.setRawStringValue(value);
+		ASSERT_FALSE(ad.getRawStringValue().empty());
 	}
 
 	void assertAccountDigitIsValid(std::string value) {
@@ -58,11 +58,10 @@ protected:
 				+ std::string("| || || || || || || || || |")
 				+ std::string("|_||_||_||_||_||_||_||_||_|");
 
-		a0.assignAccountNumber(accountNumberString);
+		a0.assignRawAccountNumber(accountNumberString);
 		assertAccountNumberSizeIsNine();
-		for (unsigned int i = 0; i < Digits::TOTAL_DIGITS; ++i) {
-			EXPECT_GE(0, a0.getAccountNumberDigitValue(i, 0));
-			EXPECT_LE(a0.getAccountNumberDigitValue(i, 0), 9);
+		for (unsigned int i = 0; i < Account::ACCOUNT_LENGTH; ++i) {
+			EXPECT_EQ(0, a0.getAccountNumber()[i].getNumericValue());
 		}
 	}
 
