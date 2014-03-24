@@ -10,7 +10,7 @@
 #ifndef ACCOUNTFILEREADERTEST_H_
 #define ACCOUNTFILEREADERTEST_H_
 
-#define DEFAULT_TEST_FILE_PATH	"C:\\Users\\Mitch\\GitHub\\AccountNumberKata\\Parser\\test_files\\"
+#define DEFAULT_TEST_FILE_PATH	"test_files\\"
 
 namespace accounts {
 
